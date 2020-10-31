@@ -6,7 +6,7 @@
     >
       <div class="col-3 text-center">
         <img
-          :src="column.avatar && column.avatar.url"
+          :src="column.avatar && column.avatar.fitUrl"
           :alt="column.title"
           class="rounded-circle border w-100"
         />
@@ -24,8 +24,9 @@
 import { computed, defineComponent, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useStore } from 'vuex'
-import { GlobalDataProps } from '../store'
+import { ColumnProps, GlobalDataProps } from '../store'
 import PostList from '../components/PostList.vue'
+import { generateFitUrl } from '../helper'
 
 export default defineComponent({
   components: {
@@ -39,7 +40,13 @@ export default defineComponent({
       store.dispatch('fetchColumn', currentId)
       store.dispatch('fetchPosts', currentId)
     })
-    const column = computed(() => store.getters.getColumnById(currentId))
+    const column = computed(() => {
+      const selectColumn = store.getters.getColumnById(currentId) as ColumnProps
+      if (selectColumn) {
+        generateFitUrl(selectColumn, 100, 100)
+      }
+      return selectColumn
+    })
     const list = computed(() => store.getters.getPostsById(currentId))
     return {
       list,
