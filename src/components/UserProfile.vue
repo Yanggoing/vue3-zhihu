@@ -40,8 +40,6 @@ export default defineComponent({
 .user-profile-component img {
   width: 50px;
   height: 50px;
-  /* border: 1px solid #ccc;
-  border-radius: 50px; */
 }
 
 </style>
