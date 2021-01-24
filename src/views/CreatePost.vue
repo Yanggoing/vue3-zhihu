@@ -4,7 +4,6 @@
     <uploader
       action="/upload"
       :beforeUpload="uploadCheck"
-      :uploaded="uploadedData"
       @file-uploaded="handleFileUploaded"
       class="d-flex align-items-center justify-content-center bg-light text-secondary w-100 my-4"
     >
@@ -46,17 +45,16 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { useStore } from 'vuex'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
-import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '@/store'
+import { GlobalDataProps, PostProps, ResponseType, ImageProps } from '../store'
 import ValidateInput, { RulesProp } from '../components/ValidateInput.vue'
 import ValidateForm from '../components/ValidateForm.vue'
 import Uploader from '../components/Uploader.vue'
-import { beforeUploadCheck } from '@/helper'
+import { beforeUploadCheck } from '../helper'
 import createMessage from '../components/createMessage'
-
 export default defineComponent({
   components: {
     ValidateInput,
@@ -65,38 +63,16 @@ export default defineComponent({
   },
   setup () {
     const router = useRouter()
-    const route = useRoute()
-    const isEditMode = !!route.query.id
     const store = useStore<GlobalDataProps>()
     let imageId = ''
-    const uploadedData = ref()
     const titleVal = ref('')
     const titleRules: RulesProp = [
-      {
-        type: 'required',
-        message: '文章标题不能为空'
-      }
+      { type: 'required', message: '文章标题不能为空' }
     ]
     const contentVal = ref('')
     const contentRules: RulesProp = [
-      {
-        type: 'required',
-        message: '文章详情不能为空'
-      }
+      { type: 'required', message: '文章详情不能为空' }
     ]
-    onMounted(() => {
-      if (isEditMode) {
-        store.dispatch('fetchPost', route.query.id)
-          .then((rawData: ResponseType<PostProps>) => {
-            const currentPost = rawData.data
-            if (currentPost.image) {
-              uploadedData.value = { data: currentPost.image }
-            }
-            titleVal.value = currentPost.title
-            contentVal.value = currentPost.content || ''
-          })
-      }
-    })
     const handleFileUploaded = (rawData: ResponseType<ImageProps>) => {
       if (rawData.data._id) {
         imageId = rawData.data._id
@@ -104,10 +80,7 @@ export default defineComponent({
     }
     const onFormSubmit = (result: boolean) => {
       if (result) {
-        const {
-          column,
-          _id
-        } = store.state.user
+        const { column, _id } = store.state.user
         if (column) {
           const newPost: PostProps = {
             _id: new Date().getTime().toLocaleString(),
@@ -122,17 +95,11 @@ export default defineComponent({
           store.dispatch('createPost', newPost).then(() => {
             createMessage('发表成功，2秒后跳转到文章', 'success', 2000)
             setTimeout(() => {
-              router.push({
-                name: 'column',
-                params: { id: column }
-              })
+              router.push({ name: 'column', params: { id: column } })
             }, 2000)
           })
           store.commit('createPost', newPost)
-          router.push({
-            name: 'column',
-            params: { id: column }
-          })
+          router.push({ name: 'column', params: { id: column } })
         }
       }
     }
@@ -153,14 +120,8 @@ export default defineComponent({
       }
     }
     const uploadCheck = (file: File) => {
-      const result = beforeUploadCheck(file, {
-        format: ['image/jpeg', 'image/png'],
-        size: 1
-      })
-      const {
-        passed,
-        error
-      } = result
+      const result = beforeUploadCheck(file, { format: ['image/jpeg', 'image/png'], size: 1 })
+      const { passed, error } = result
       if (error === 'format') {
         createMessage('上传图片只能是 JPG/PNG 格式!', 'error')
       }
@@ -174,7 +135,6 @@ export default defineComponent({
       titleVal,
       contentVal,
       contentRules,
-      uploadedData,
       onFormSubmit,
       handleFileChange,
       uploadCheck,
@@ -189,21 +149,17 @@ export default defineComponent({
   cursor: pointer;
   overflow: hidden;
 }
-
 .create-post-page .file-upload-container img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-
 .uploaded-area {
   position: relative;
 }
-
 .uploaded-area:hover h3 {
   display: block;
 }
-
 .uploaded-area h3 {
   display: none;
   position: absolute;

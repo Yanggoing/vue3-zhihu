@@ -59,10 +59,10 @@ export default defineComponent({
         const payload = {
           email: emailVal.value,
           password: passwordVal.value,
-          icode: '9F5DE80A896DBC4D'
+          icode: 'A5B9533CCB47A692'
         }
         store.dispatch('loginAndFetch', payload).then(res => {
-          console.log(res, 'res')
+          console.log(res)
           createMessage('登录成功', 'success')
           setTimeout(() => {
             router.push('/')
